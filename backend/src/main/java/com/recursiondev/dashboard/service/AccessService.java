@@ -1,4 +1,4 @@
 package com.recursiondev.dashboard.service;
 
-public class UserService {
+public class AccessService {
 }
