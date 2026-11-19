@@ -1,7 +1,13 @@
+
 package com.recursiondev.dashboard.controller;
 
-import com.recursiondev.dashboard.entity.Dashboard;
+import com.recursiondev.dashboard.dto.request.DashboardRequest;
+import com.recursiondev.dashboard.dto.response.DashboardResponse;
 import com.recursiondev.dashboard.service.DashboardService;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,25 +23,47 @@ public class DashboardController {
     }
 
     @PostMapping
-    public Dashboard createDashboard(
-            @RequestBody Dashboard dashboard) {
-        return dashboardService.createDashboard(dashboard);
+    public ResponseEntity<DashboardResponse> createDashboard(
+            @Valid @RequestBody DashboardRequest request) {
+
+        return ResponseEntity.ok(
+                dashboardService.createDashboard(request)
+        );
     }
 
     @GetMapping
-    public List<Dashboard> getAllDashboards() {
-        return dashboardService.getAllDashboards();
+    public ResponseEntity<List<DashboardResponse>> getAllDashboards() {
+
+        return ResponseEntity.ok(
+                dashboardService.getAllDashboards()
+        );
     }
 
     @GetMapping("/{id}")
-    public Dashboard getDashboardById(
+    public ResponseEntity<DashboardResponse> getDashboardById(
             @PathVariable Long id) {
-        return dashboardService.getDashboardById(id);
+
+        return ResponseEntity.ok(
+                dashboardService.getDashboardById(id)
+        );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DashboardResponse> updateDashboard(
+            @PathVariable Long id,
+            @Valid @RequestBody DashboardRequest request) {
+
+        return ResponseEntity.ok(
+                dashboardService.updateDashboard(id, request)
+        );
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDashboard(
+    public ResponseEntity<Void> deleteDashboard(
             @PathVariable Long id) {
+
         dashboardService.deleteDashboard(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
