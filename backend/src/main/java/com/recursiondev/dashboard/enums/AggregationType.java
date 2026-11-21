@@ -1,4 +1,11 @@
 package com.recursiondev.dashboard.enums;
 
-public class AggregationType {
+public enum AggregationType {
+
+    SUM,
+    COUNT,
+    AVG,
+    MIN,
+    MAX
+
 }

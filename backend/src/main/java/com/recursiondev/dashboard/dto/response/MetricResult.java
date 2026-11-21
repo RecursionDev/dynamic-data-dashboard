@@ -1,4 +1,6 @@
 package com.recursiondev.dashboard.dto.response;
 
-public class MetricResult {
-}
+public record MetricResult(
+        String group,
+        Number result
+) {}
