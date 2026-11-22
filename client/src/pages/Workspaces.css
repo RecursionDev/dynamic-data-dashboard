@@ -1,0 +1,260 @@
+
+.workspace-create-card,
+.workspace-list-section,
+.workspace-details-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.workspace-create-card {
+  margin-bottom: 22px;
+}
+
+.workspace-create-card h3,
+.workspace-section-heading h3 {
+  margin: 0 0 14px;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.workspace-create-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.workspace-create-form input {
+  flex: 1;
+  min-width: 200px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d9dee7;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+}
+
+.workspace-create-form input:focus {
+  border-color: #2563eb;
+}
+
+.workspace-cancel-button {
+  height: 42px;
+  padding: 0 15px;
+  background: #fff;
+  border: 1px solid #d9dee7;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.workspace-error {
+  margin: 10px 0 0;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.workspace-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.5fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.workspace-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.workspace-section-heading h3 {
+  margin-bottom: 5px;
+}
+
+.workspace-section-heading span {
+  color: #778195;
+  font-size: 12px;
+}
+
+.workspace-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.workspace-item {
+  padding: 12px;
+  border: 1px solid #e6e9ef;
+  border-radius: 7px;
+}
+
+.workspace-item.active {
+  border-color: #2563eb;
+  background: #f5f8ff;
+}
+
+.workspace-select {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: #344054;
+  cursor: pointer;
+}
+
+.workspace-select span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.workspace-select strong {
+  color: #172033;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.workspace-select small {
+  color: #7b8494;
+  font-size: 12px;
+}
+
+.workspace-item-actions {
+  display: flex;
+  gap: 14px;
+  margin: 11px 0 0 30px;
+}
+
+.workspace-item-actions button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.workspace-item-actions .workspace-delete {
+  color: #dc2626;
+}
+
+.workspace-dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.workspace-dashboard-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #e6e9ef;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.workspace-dashboard-item:hover {
+  background: #f8fafc;
+}
+
+.workspace-dashboard-item input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.workspace-dashboard-icon {
+  display: flex;
+  color: #64748b;
+}
+
+.workspace-dashboard-info {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.workspace-dashboard-info strong {
+  color: #172033;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.workspace-dashboard-info small {
+  color: #7b8494;
+  font-size: 12px;
+}
+
+.workspace-assignment-status {
+  color: #64748b;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.workspace-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 35px 18px;
+  text-align: center;
+  color: #8490a2;
+}
+
+.workspace-empty strong {
+  color: #344054;
+  font-size: 14px;
+}
+
+.workspace-empty p {
+  max-width: 300px;
+  margin: 0;
+  color: #7b8494;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.workspace-details-empty {
+  min-height: 230px;
+}
+
+@media (max-width: 850px) {
+  .workspace-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .workspace-create-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .workspace-create-form input,
+  .workspace-create-form button {
+    width: 100%;
+  }
+
+  .workspace-dashboard-item {
+    flex-wrap: wrap;
+  }
+
+  .workspace-assignment-status {
+    margin-left: 28px;
+  }
+}
