@@ -1,4 +1,8 @@
 package com.recursiondev.dashboard.repository;
 
-public class WorkspaceRepository {
+import com.recursiondev.dashboard.entity.Workspace;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface WorkspaceRepository extends JpaRepository<Workspace, Long> {
+
 }
