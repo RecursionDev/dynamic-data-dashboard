@@ -1,5 +1,6 @@
 package com.recursiondev.dashboard.service;
 
+import com.recursiondev.dashboard.config.CacheConfig;
 import com.recursiondev.dashboard.dto.request.DashboardQueryRequest;
 import com.recursiondev.dashboard.dto.response.MetricResult;
 import com.recursiondev.dashboard.entity.DatasetRecord;
@@ -9,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +44,12 @@ public class DashboardQueryService {
 
     /**
      * Executes a dynamic aggregation query on DatasetRecord using JPA Criteria API.
+     * Results are cached by query parameters to minimize database load.
      *
      * @param request the dashboard query specification
      * @return list of MetricResult containing grouped keys, aggregated values, and record counts
      */
+    @Cacheable(value = CacheConfig.QUERY_CACHE, key = "#request.datasetId + '-' + #request.groupByField + '-' + #request.metricField + '-' + #request.aggregationType + '-' + #request.filterField + '-' + #request.filterValue + '-' + #request.minMetricValue + '-' + #request.maxMetricValue + '-' + #request.sortOrder + '-' + #request.limit")
     public List<MetricResult> executeQuery(DashboardQueryRequest request) {
         if (request == null) {
             throw new BadRequestException("DashboardQueryRequest cannot be null");
@@ -179,6 +183,7 @@ public class DashboardQueryService {
         }
     }
 
+    @Cacheable(value = CacheConfig.ALLOWED_FIELDS_CACHE)
     public Map<String, Object> getAllowedFields() {
         Map<String, Object> schema = new LinkedHashMap<>();
         schema.put("allowedGroupFields", ALLOWED_GROUP_FIELDS);

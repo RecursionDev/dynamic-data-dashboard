@@ -19,3 +19,6 @@ backend/target/
 # Node
 node_modules/
 client/dist/
+
+# Excel / Documents
+*.xlsx

@@ -1,8 +1,10 @@
 package com.recursiondev.dashboard.service;
 
+import com.recursiondev.dashboard.config.CacheConfig;
 import com.recursiondev.dashboard.dto.request.DashboardQueryRequest;
 import com.recursiondev.dashboard.dto.response.MetricResult;
 import com.recursiondev.dashboard.enums.AggregationType;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -34,6 +36,7 @@ public class MetricService {
     /**
      * Compute summary metrics (SUM, AVG, MIN, MAX, COUNT) for a dataset.
      */
+    @Cacheable(value = CacheConfig.METRIC_CACHE, key = "#datasetId + '-' + #metricField")
     public Map<String, Double> getSummaryMetrics(String datasetId, String metricField) {
         Map<String, Double> summary = new LinkedHashMap<>();
 
