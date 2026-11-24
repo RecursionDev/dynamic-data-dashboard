@@ -38,4 +38,11 @@ public class DashboardController {
             @PathVariable Long id) {
         dashboardService.deleteDashboard(id);
     }
+    @PutMapping("/{id}")
+    public Dashboard updateDashboard(
+            @PathVariable Long id,
+            @RequestBody Dashboard dashboard) {
+
+        return dashboardService.updateDashboard(id, dashboard);
+    }
 }
