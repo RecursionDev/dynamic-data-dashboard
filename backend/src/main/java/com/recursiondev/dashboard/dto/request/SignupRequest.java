@@ -6,14 +6,13 @@ import jakarta.validation.constraints.Size;
 
 public record SignupRequest(
 
-        @NotBlank
-        String name,
+        @NotBlank(message = "Username is required")
+        String username,
 
-        @Email
-        @NotBlank
-        String email,
+        @Email(message = "Invalid email")
+        @NotBlank(message = "Email is required") String email,
 
-        @Size(min = 8)
+        @Size(min = 8, message = "Password must be at least 8 characters")
         String password
 
 ) {}
