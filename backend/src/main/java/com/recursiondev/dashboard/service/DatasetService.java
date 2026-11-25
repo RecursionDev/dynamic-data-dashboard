@@ -1,9 +1,11 @@
 package com.recursiondev.dashboard.service;
 
+import com.recursiondev.dashboard.config.CacheConfig;
 import com.recursiondev.dashboard.dto.request.DatasetRecordRequest;
 import com.recursiondev.dashboard.dto.response.DatasetRecordResponse;
 import com.recursiondev.dashboard.entity.DatasetRecord;
 import com.recursiondev.dashboard.repository.DatasetRecordRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +22,14 @@ public class DatasetService {
         this.recordRepository = recordRepository;
     }
 
+    @CacheEvict(value = {CacheConfig.QUERY_CACHE, CacheConfig.METRIC_CACHE}, allEntries = true)
     public DatasetRecordResponse createRecord(DatasetRecordRequest request) {
         DatasetRecord entity = toEntity(request);
         DatasetRecord saved = recordRepository.save(entity);
         return toResponse(saved);
     }
 
+    @CacheEvict(value = {CacheConfig.QUERY_CACHE, CacheConfig.METRIC_CACHE}, allEntries = true)
     public List<DatasetRecordResponse> createRecordsBulk(List<DatasetRecordRequest> requests) {
         List<DatasetRecord> entities = requests.stream()
                 .map(this::toEntity)
@@ -48,6 +52,7 @@ public class DatasetService {
         return recordRepository.countByDatasetId(datasetId);
     }
 
+    @CacheEvict(value = {CacheConfig.QUERY_CACHE, CacheConfig.METRIC_CACHE}, allEntries = true)
     public void deleteDataset(String datasetId) {
         recordRepository.deleteByDatasetId(datasetId);
     }

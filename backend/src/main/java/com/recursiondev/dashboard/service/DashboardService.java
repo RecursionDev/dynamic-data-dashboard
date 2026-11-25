@@ -34,4 +34,17 @@ public class DashboardService {
     public void deleteDashboard(Long id) {
         dashboardRepository.deleteById(id);
     }
+    public Dashboard updateDashboard(
+            Long id,
+            Dashboard updatedDashboard) {
+
+        Dashboard dashboard = dashboardRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Dashboard not found"));
+
+        dashboard.setTitle(updatedDashboard.getTitle());
+        dashboard.setDescription(updatedDashboard.getDescription());
+
+        return dashboardRepository.save(dashboard);
+    }
 }
