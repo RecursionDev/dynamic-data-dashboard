@@ -1,37 +1,36 @@
 
-import { useRef, useState } from "react";
-import Papa from "papaparse";
+import React, { useContext, useRef, useState } from "react";
 import {
   Upload,
-  FileSpreadsheet,
+  UploadCloud,
   Search,
+  Database,
+  FileSpreadsheet,
+  FileText,
   Trash2,
+  Eye,
   X,
   CheckCircle2,
-  AlertCircle,
-  Database,
-  Eye,
+  AlertCircle
 } from "lucide-react";
+
+import { DatasetContext } from "../context/DatasetContext";
+import PageHeading from "../components/layout/PageHeading";
+import EmptyState from "../components/layout/EmptyState";
+import parseCSV from "../utils/csvParser";
 import "./Datasets.css";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const PREVIEW_ROWS = 8;
-
-function formatSize(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
-
 export default function Datasets() {
-  const inputRef = useRef(null);
-  const [datasets, setDatasets] = useState([]);
-  const [selectedDataset, setSelectedDataset] = useState(null);
-  const [search, setSearch] = useState("");
-  const [error, setError] = useState("");
-  const [dragging, setDragging] = useState(false);
+  const { datasets, setDatasets } = useContext(DatasetContext);
 
-  function processFile(file) {
+  const [selectedDataset, setSelectedDataset] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+
+  const fileInputRef = useRef(null);
+
+  async function handleFile(file) {
     setError("");
 
     if (!file) return;
@@ -41,116 +40,94 @@ export default function Datasets() {
       return;
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      setError("File is too large. The maximum allowed size is 10 MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size must be less than 10 MB.");
       return;
     }
 
-    if (file.size === 0) {
-      setError("This file is empty. Please choose another CSV file.");
-      return;
+    try {
+      const text = await file.text();
+      const { headers, data } = parseCSV(text);
+
+      const newDataset = {
+        id: `${Date.now()}-${Math.random()}`,
+        name: file.name,
+        size: file.size,
+        headers,
+        rows: data,
+        uploadedAt: new Date().toLocaleString()
+      };
+
+      setDatasets(previous => [newDataset, ...previous]);
+      setSelectedDataset(newDataset);
+    } catch (err) {
+      setError(err.message || "Unable to read this CSV file.");
     }
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => header.trim(),
-      complete: (results) => {
-        const headers = results.meta.fields || [];
-        const rows = results.data || [];
-
-        if (results.errors.length > 0) {
-          setError(
-            `Could not read the CSV completely: ${results.errors[0].message}`
-          );
-          return;
-        }
-
-        if (headers.length === 0 || headers.every((header) => !header)) {
-          setError("The CSV file must contain column headers in its first row.");
-          return;
-        }
-
-        if (rows.length === 0) {
-          setError("No data rows were found in this CSV file.");
-          return;
-        }
-
-        const dataset = {
-          id: `${Date.now()}-${Math.random()}`,
-          name: file.name.replace(/\.csv$/i, ""),
-          fileName: file.name,
-          size: file.size,
-          headers,
-          rows,
-          uploadedAt: new Date().toLocaleString(),
-        };
-
-        setDatasets((previous) => [dataset, ...previous]);
-        setSelectedDataset(dataset);
-      },
-      error: () => {
-        setError("Unable to read this file. Please try another CSV file.");
-      },
-    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
-  function handleInputChange(event) {
-    const file = event.target.files?.[0];
-    processFile(file);
-    event.target.value = "";
+  function handleFileChange(event) {
+    handleFile(event.target.files?.[0]);
   }
 
   function handleDrop(event) {
     event.preventDefault();
-    setDragging(false);
-    processFile(event.dataTransfer.files?.[0]);
+    setIsDragging(false);
+    handleFile(event.dataTransfer.files?.[0]);
   }
 
   function deleteDataset(id) {
-    setDatasets((previous) => previous.filter((item) => item.id !== id));
+    setDatasets(previous => previous.filter(item => item.id !== id));
 
     if (selectedDataset?.id === id) {
       setSelectedDataset(null);
     }
   }
 
-  const filteredDatasets = datasets.filter((dataset) =>
-    dataset.name.toLowerCase().includes(search.toLowerCase())
+  const filteredDatasets = datasets.filter(dataset =>
+    dataset.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const activeDataset = datasets.find(
-    (dataset) => dataset.id === selectedDataset?.id
-  );
+  function formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
 
   return (
     <div className="datasets-page">
-      <div className="datasets-heading">
-        <div>
-          <h1>Datasets</h1>
-          <p>Upload, preview and manage your CSV data sources.</p>
-        </div>
-
-        <button
-          className="ds-upload-button"
-          onClick={() => inputRef.current?.click()}
-        >
-          <Upload size={16} />
-          Upload CSV
-        </button>
-      </div>
+      <PageHeading
+        title="Datasets"
+        description="Upload, preview and manage your CSV data sources."
+        action={
+          <button
+            className="ds-upload-button"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload size={17} />
+            Upload dataset
+          </button>
+        }
+      />
 
       <input
-        ref={inputRef}
+        ref={fileInputRef}
         type="file"
         accept=".csv,text/csv"
         hidden
-        onChange={handleInputChange}
+        onChange={handleFileChange}
       />
 
       {error && (
-        <div className="ds-error" role="alert">
-          <AlertCircle size={17} />
+        <div className="ds-error">
+          <AlertCircle size={18} />
           <span>{error}</span>
           <button onClick={() => setError("")} aria-label="Dismiss error">
             <X size={16} />
@@ -158,61 +135,66 @@ export default function Datasets() {
         </div>
       )}
 
-      <section
-        className={`ds-dropzone ${dragging ? "ds-dropzone-active" : ""}`}
-        onDragOver={(event) => {
+      <div
+        className={`ds-dropzone ${isDragging ? "ds-dropzone-active" : ""}`}
+        onDragOver={event => {
           event.preventDefault();
-          setDragging(true);
+          setIsDragging(true);
         }}
-        onDragLeave={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setDragging(false);
-          }
-        }}
+        onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
       >
         <div className="ds-upload-icon">
-          <Upload size={25} />
+          <UploadCloud size={27} />
         </div>
 
-        <h2>Upload your dataset</h2>
-        <p>Drag and drop a CSV file here, or select a file from your computer.</p>
+        <h2>Upload your CSV dataset</h2>
+
+        <p>
+          Drag and drop your CSV file here, or browse files from your computer.
+        </p>
 
         <button
           className="ds-browse-button"
-          onClick={() => inputRef.current?.click()}
+          onClick={() => fileInputRef.current?.click()}
         >
           Browse files
         </button>
 
-        <span className="ds-file-hint">CSV files only · Maximum size 10 MB</span>
-      </section>
+        <span className="ds-file-hint">
+          CSV files only · Maximum file size: 10 MB
+        </span>
+      </div>
 
       <div className="ds-list-heading">
         <div>
           <h2>Your datasets</h2>
-          <p>{datasets.length} uploaded dataset{datasets.length === 1 ? "" : "s"}</p>
+          <p>{datasets.length} dataset(s) uploaded in this session</p>
         </div>
 
-        <div className="ds-search">
+        <label className="ds-search">
           <Search size={16} />
           <input
             type="search"
             placeholder="Search datasets..."
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            value={searchTerm}
+            onChange={event => setSearchTerm(event.target.value)}
           />
-        </div>
+        </label>
       </div>
 
       {filteredDatasets.length === 0 ? (
         <div className="ds-empty">
-          <Database size={28} />
-          <h3>{datasets.length === 0 ? "No datasets uploaded" : "No matching datasets"}</h3>
+          <Database size={32} />
+          <h3>
+            {datasets.length === 0
+              ? "No datasets uploaded"
+              : "No matching datasets"}
+          </h3>
           <p>
             {datasets.length === 0
-              ? "Upload a CSV file to see its columns and data preview here."
-              : "Try another search term."}
+              ? "Upload a CSV file to see your data here."
+              : "Try searching with a different file name."}
           </p>
         </div>
       ) : (
@@ -229,7 +211,7 @@ export default function Datasets() {
             </thead>
 
             <tbody>
-              {filteredDatasets.map((dataset) => (
+              {filteredDatasets.map(dataset => (
                 <tr key={dataset.id}>
                   <td>
                     <div className="ds-file-cell">
@@ -238,27 +220,30 @@ export default function Datasets() {
                       </div>
                       <div>
                         <strong>{dataset.name}</strong>
-                        <small>{dataset.fileName}</small>
+                        <small>{dataset.uploadedAt}</small>
                       </div>
                     </div>
                   </td>
-                  <td>{dataset.rows.length.toLocaleString()}</td>
+
+                  <td>{dataset.rows.length}</td>
                   <td>{dataset.headers.length}</td>
                   <td>{formatSize(dataset.size)}</td>
+
                   <td>
                     <div className="ds-actions">
                       <button
-                        onClick={() => setSelectedDataset(dataset)}
-                        aria-label={`Preview ${dataset.name}`}
                         title="Preview dataset"
+                        aria-label={`Preview ${dataset.name}`}
+                        onClick={() => setSelectedDataset(dataset)}
                       >
                         <Eye size={17} />
                       </button>
+
                       <button
                         className="ds-delete"
-                        onClick={() => deleteDataset(dataset.id)}
-                        aria-label={`Delete ${dataset.name}`}
                         title="Delete dataset"
+                        aria-label={`Delete ${dataset.name}`}
+                        onClick={() => deleteDataset(dataset.id)}
                       >
                         <Trash2 size={17} />
                       </button>
@@ -271,21 +256,23 @@ export default function Datasets() {
         </div>
       )}
 
-      {activeDataset && (
+      {selectedDataset && (
         <section className="ds-preview">
           <div className="ds-preview-heading">
             <div>
               <div className="ds-preview-title">
                 <FileSpreadsheet size={19} />
-                <h2>{activeDataset.name}</h2>
+                <h2>{selectedDataset.name}</h2>
                 <span className="ds-loaded">
                   <CheckCircle2 size={13} />
                   Loaded
                 </span>
               </div>
+
               <p>
-                Showing up to {Math.min(PREVIEW_ROWS, activeDataset.rows.length)} of{" "}
-                {activeDataset.rows.length.toLocaleString()} rows
+                Previewing the first{" "}
+                {Math.min(8, selectedDataset.rows.length)} of{" "}
+                {selectedDataset.rows.length} data rows
               </p>
             </div>
 
@@ -294,40 +281,46 @@ export default function Datasets() {
               onClick={() => setSelectedDataset(null)}
               aria-label="Close preview"
             >
-              <X size={19} />
+              <X size={18} />
             </button>
           </div>
 
-          <div className="ds-preview-table-wrap">
-            <table className="ds-preview-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  {activeDataset.headers.map((header, index) => (
-                    <th key={`${header}-${index}`}>{header || `Column ${index + 1}`}</th>
-                  ))}
-                </tr>
-              </thead>
-
-              <tbody>
-                {activeDataset.rows.slice(0, PREVIEW_ROWS).map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    <td>{rowIndex + 1}</td>
-                    {activeDataset.headers.map((header, columnIndex) => (
-                      <td key={`${header}-${columnIndex}`}>
-                        {String(row[header] ?? "")}
-                      </td>
+          {selectedDataset.rows.length === 0 ? (
+            <div className="ds-empty">
+              <FileText size={30} />
+              <h3>No data rows found</h3>
+              <p>This CSV contains column headers but no data rows.</p>
+            </div>
+          ) : (
+            <div className="ds-preview-table-wrap">
+              <table className="ds-preview-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    {selectedDataset.headers.map((header, index) => (
+                      <th key={index}>{header}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+
+                <tbody>
+                  {selectedDataset.rows.slice(0, 8).map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td>{rowIndex + 1}</td>
+                      {row.map((cell, cellIndex) => (
+                        <td key={cellIndex}>{cell || "—"}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           <div className="ds-preview-footer">
-            <span>{activeDataset.headers.length} columns</span>
-            <span>{activeDataset.rows.length.toLocaleString()} rows</span>
-            <span>{formatSize(activeDataset.size)}</span>
+            <span>{selectedDataset.headers.length} columns</span>
+            <span>{selectedDataset.rows.length} rows</span>
+            <span>{formatSize(selectedDataset.size)}</span>
           </div>
         </section>
       )}
