@@ -2,6 +2,8 @@ package com.recursiondev.dashboard.controller;
 
 import com.recursiondev.dashboard.entity.Dashboard;
 import com.recursiondev.dashboard.service.DashboardService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,5 +46,22 @@ public class DashboardController {
             @RequestBody Dashboard dashboard) {
 
         return dashboardService.updateDashboard(id, dashboard);
+    }
+    @GetMapping("/search")
+    public List<Dashboard> searchDashboards(@RequestParam String title) {
+        return dashboardService.searchDashboard(title);
+    }
+
+    @GetMapping("/paged")
+    public Page<Dashboard> getPagedDashboards(
+            Pageable pageable) {
+
+        return dashboardService
+                .getPagedDashboards(pageable);
+    }
+    @GetMapping("/sorted")
+    public List<Dashboard> getSortedDashboards() {
+
+        return dashboardService.getSortedDashboards();
     }
 }
