@@ -2,6 +2,7 @@ package com.recursiondev.dashboard.service;
 
 import com.recursiondev.dashboard.config.CacheConfig;
 import com.recursiondev.dashboard.dto.request.DashboardQueryRequest;
+import com.recursiondev.dashboard.dto.request.MetricRequest;
 import com.recursiondev.dashboard.dto.response.MetricResult;
 import com.recursiondev.dashboard.enums.AggregationType;
 import org.springframework.cache.annotation.Cacheable;
@@ -59,5 +60,8 @@ public class MetricService {
         request.setAggregationType(aggregationType);
 
         return queryService.executeQuery(request);
+    }
+    public String generateMetric(MetricRequest request) {
+       return "Metric: " + request.getMetric() + ", Group By: " + request.getGroupBy();
     }
 }

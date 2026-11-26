@@ -4,7 +4,11 @@ package com.recursiondev.dashboard.service;
 
 import com.recursiondev.dashboard.entity.Dashboard;
 import com.recursiondev.dashboard.repository.DashboardRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 
 import java.util.List;
@@ -46,5 +50,16 @@ public class DashboardService {
         dashboard.setDescription(updatedDashboard.getDescription());
 
         return dashboardRepository.save(dashboard);
+    }
+    public List<Dashboard> searchDashboard(String title){
+        return dashboardRepository.findByTitleContainingIgnoreCase(title);
+    }
+    public Page<Dashboard> getPagedDashboards(Pageable pageable) {
+        return dashboardRepository.findAll(pageable);
+    }
+    @GetMapping("/sorted")
+    public List<Dashboard> getSortedDashboards() {
+        return dashboardRepository.findAll(
+                Sort.by("title"));
     }
 }
