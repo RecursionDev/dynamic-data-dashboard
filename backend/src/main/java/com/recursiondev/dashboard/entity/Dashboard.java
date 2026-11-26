@@ -1,3 +1,4 @@
+
 package com.recursiondev.dashboard.entity;
 
 import jakarta.persistence.*;
@@ -17,6 +18,10 @@ public class Dashboard {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workspace_id", nullable = false)
+    private Workspace workspace;
 
     public Dashboard() {
     }
@@ -59,6 +64,12 @@ public class Dashboard {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    public void setWorkspace(Workspace workspace) {
+        this.workspace = workspace;
+    }
 }
-
-
