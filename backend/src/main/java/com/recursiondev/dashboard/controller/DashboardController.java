@@ -1,13 +1,10 @@
-
 package com.recursiondev.dashboard.controller;
-
-import java.util.List;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
 
 import com.recursiondev.dashboard.entity.Dashboard;
 import com.recursiondev.dashboard.service.DashboardService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dashboards")
@@ -19,57 +16,33 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
-    @PostMapping("/workspace/{workspaceId}")
+    @PostMapping
     public Dashboard createDashboard(
-            @PathVariable Long workspaceId,
-            @RequestBody Dashboard dashboard,
-            Authentication authentication) {
-
-        return dashboardService.createDashboard(
-                dashboard,
-                workspaceId,
-                authentication.getName());
+            @RequestBody Dashboard dashboard) {
+        return dashboardService.createDashboard(dashboard);
     }
 
-    @GetMapping("/workspace/{workspaceId}")
-    public List<Dashboard> getAllDashboards(
-            @PathVariable Long workspaceId,
-            Authentication authentication) {
-
-        return dashboardService.getAllDashboards(
-                workspaceId,
-                authentication.getName());
+    @GetMapping
+    public List<Dashboard> getAllDashboards() {
+        return dashboardService.getAllDashboards();
     }
 
     @GetMapping("/{id}")
     public Dashboard getDashboardById(
-            @PathVariable Long id,
-            Authentication authentication) {
-
-        return dashboardService.getDashboardById(
-                id,
-                authentication.getName());
-    }
-
-    @PutMapping("/{id}")
-    public Dashboard updateDashboard(
-            @PathVariable Long id,
-            @RequestBody Dashboard dashboard,
-            Authentication authentication) {
-
-        return dashboardService.updateDashboard(
-                id,
-                dashboard,
-                authentication.getName());
+            @PathVariable Long id) {
+        return dashboardService.getDashboardById(id);
     }
 
     @DeleteMapping("/{id}")
     public void deleteDashboard(
+            @PathVariable Long id) {
+        dashboardService.deleteDashboard(id);
+    }
+    @PutMapping("/{id}")
+    public Dashboard updateDashboard(
             @PathVariable Long id,
-            Authentication authentication) {
+            @RequestBody Dashboard dashboard) {
 
-        dashboardService.deleteDashboard(
-                id,
-                authentication.getName());
+        return dashboardService.updateDashboard(id, dashboard);
     }
 }

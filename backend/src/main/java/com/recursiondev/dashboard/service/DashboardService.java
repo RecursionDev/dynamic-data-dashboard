@@ -1,76 +1,46 @@
-
 package com.recursiondev.dashboard.service;
 
-import java.util.List;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.recursiondev.dashboard.entity.Dashboard;
-import com.recursiondev.dashboard.entity.Workspace;
 import com.recursiondev.dashboard.repository.DashboardRepository;
+import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
+
+import java.util.List;
 
 @Service
 public class DashboardService {
 
     private final DashboardRepository dashboardRepository;
-    private final AccessService accessService;
 
-    public DashboardService(
-            DashboardRepository dashboardRepository,
-            AccessService accessService) {
-
+    public DashboardService(DashboardRepository dashboardRepository) {
         this.dashboardRepository = dashboardRepository;
-        this.accessService = accessService;
     }
-
-    public Dashboard createDashboard(
-            Dashboard dashboard,
-            Long workspaceId,
-            String email) {
-
-        Workspace workspace =
-                accessService.verifyWorkspaceAccess(workspaceId, email);
-
-        dashboard.setWorkspace(workspace);
-
+    public Dashboard createDashboard(Dashboard dashboard) {
         return dashboardRepository.save(dashboard);
     }
 
-    public List<Dashboard> getAllDashboards(
-            Long workspaceId,
-            String email) {
-
-        accessService.verifyWorkspaceAccess(workspaceId, email);
-
-        return dashboardRepository
-                .findByWorkspaceIdAndWorkspaceOwnerEmail(workspaceId, email);
+    public List<Dashboard> getAllDashboards() {
+        return dashboardRepository.findAll();
     }
 
-    public Dashboard getDashboardById(Long id, String email) {
-
-        return dashboardRepository
-                .findByIdAndWorkspaceOwnerEmail(id, email)
+    public Dashboard getDashboardById(Long id) {
+        return dashboardRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Dashboard not found"));
+                        new RuntimeException("Dashboard not found"));
     }
 
-    public void deleteDashboard(Long id, String email) {
-
-        Dashboard dashboard = getDashboardById(id, email);
-
-        dashboardRepository.delete(dashboard);
+    public void deleteDashboard(Long id) {
+        dashboardRepository.deleteById(id);
     }
-
-    @Transactional
     public Dashboard updateDashboard(
             Long id,
-            Dashboard updatedDashboard,
-            String email) {
+            Dashboard updatedDashboard) {
 
-        Dashboard dashboard = getDashboardById(id, email);
+        Dashboard dashboard = dashboardRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Dashboard not found"));
 
         dashboard.setTitle(updatedDashboard.getTitle());
         dashboard.setDescription(updatedDashboard.getDescription());

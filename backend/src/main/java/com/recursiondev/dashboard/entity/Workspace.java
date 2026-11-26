@@ -1,4 +1,3 @@
-
 package com.recursiondev.dashboard.entity;
 
 import jakarta.persistence.*;

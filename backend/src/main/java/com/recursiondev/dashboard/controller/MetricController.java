@@ -1,9 +1,11 @@
 package com.recursiondev.dashboard.controller;
 
+import com.recursiondev.dashboard.dto.request.MetricRequest;
 import com.recursiondev.dashboard.dto.response.ApiResponse;
 import com.recursiondev.dashboard.dto.response.MetricResult;
 import com.recursiondev.dashboard.enums.AggregationType;
 import com.recursiondev.dashboard.service.MetricService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +20,13 @@ public class MetricController {
 
     public MetricController(MetricService metricService) {
         this.metricService = metricService;
+    }
+
+    @PostMapping
+    public String generateMetric(
+            @Valid @RequestBody MetricRequest request) {
+
+        return metricService.generateMetric(request);
     }
 
     @GetMapping("/kpi")
