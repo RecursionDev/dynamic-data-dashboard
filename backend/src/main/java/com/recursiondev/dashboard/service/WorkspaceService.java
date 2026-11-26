@@ -1,4 +1,7 @@
+
 package com.recursiondev.dashboard.service;
+
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -38,5 +41,15 @@ public class WorkspaceService {
         workspace.setOwner(owner);
 
         return workspaceRepository.save(workspace);
+    }
+
+    public List<Workspace> getAllWorkspaces(String email) {
+        return workspaceRepository.findByOwnerEmail(email);
+    }
+
+    public Workspace getWorkspaceById(Long id, String email) {
+        return workspaceRepository.findByIdAndOwnerEmail(id, email)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Workspace not found"));
     }
 }
