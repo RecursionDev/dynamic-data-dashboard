@@ -11,8 +11,10 @@ import {
   Eye,
   X,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Download
 } from "lucide-react";
+import ExcelJS from "exceljs";
 
 import { DatasetContext } from "../context/DatasetContext";
 import PageHeading from "../components/layout/PageHeading";
@@ -87,6 +89,77 @@ export default function Datasets() {
     }
   }
 
+    function downloadFile(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  function getExportName(extension) {
+    const baseName = selectedDataset.name.replace(/\.[^/.]+$/, "");
+    return `${baseName}.${extension}`;
+  }
+
+  function exportCSV() {
+    const allRows = [
+      selectedDataset.headers,
+      ...selectedDataset.rows
+    ];
+
+    const csvContent = allRows
+      .map(row =>
+        row.map(cell =>
+          `"${String(cell ?? "").replace(/"/g, '""')}"`
+        ).join(",")
+      )
+      .join("\r\n");
+
+    const blob = new Blob(["\uFEFF", csvContent], {
+      type: "text/csv;charset=utf-8;"
+    });
+
+    downloadFile(blob, getExportName("csv"));
+  }
+
+  async function exportExcel() {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Dataset");
+
+      worksheet.columns = selectedDataset.headers.map((header, index) => ({
+        key: `column${index + 1}`,
+        width: Math.min(Math.max(String(header).length + 4, 12), 30)
+      }));
+
+      worksheet.addRow(selectedDataset.headers);
+
+      selectedDataset.rows.forEach(row => {
+        worksheet.addRow(row);
+      });
+
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.views = [{ state: "frozen", ySplit: 1 }];
+
+      const buffer = await workbook.xlsx.writeBuffer();
+
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      });
+
+      downloadFile(blob, getExportName("xlsx"));
+    } catch (err) {
+      setError("Unable to export Excel file. Please try again.");
+      console.error("Excel export error:", err);
+    }
+  }
   const filteredDatasets = datasets.filter(dataset =>
     dataset.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -276,13 +349,25 @@ export default function Datasets() {
               </p>
             </div>
 
-            <button
-              className="ds-close-preview"
-              onClick={() => setSelectedDataset(null)}
-              aria-label="Close preview"
-            >
-              <X size={18} />
-            </button>
+            <div className="ds-export-actions">
+              <button onClick={exportCSV} title="Export as CSV">
+                <Download size={15} />
+                CSV
+              </button>
+
+              <button onClick={exportExcel} title="Export as Excel">
+                <FileSpreadsheet size={15} />
+                Excel
+              </button>
+
+              <button
+                className="ds-close-preview"
+                onClick={() => setSelectedDataset(null)}
+                aria-label="Close preview"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {selectedDataset.rows.length === 0 ? (

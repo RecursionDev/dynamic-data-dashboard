@@ -11,7 +11,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { DatasetContext } from "../context/DatasetContext";
-import "./Metrics.css";
+
 
 const OPERATIONS = ["SUM", "COUNT", "AVERAGE", "MIN", "MAX"];
 
